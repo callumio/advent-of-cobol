@@ -14,7 +14,6 @@
          05 WS-FINISHED PIC X VALUE "N".
          05 WS-SCORE-1 PIC 9.
          05 WS-SCORE-2 PIC 9.
-         05 WS-WINLOSS PIC 9.
          05 WS-TOTAL-SCORE-1 PIC 9(6) VALUE 0.
          05 WS-TOTAL-SCORE-2 PIC 9(6) VALUE 0.
        PROCEDURE DIVISION.
@@ -31,15 +30,15 @@
 
            EVALUATE TRUE
                WHEN WS-SCORE-1 = WS-SCORE-2
-                   MOVE 3 TO WS-WINLOSS
+                   ADD 3 TO WS-TOTAL-SCORE-1
                WHEN WS-SCORE-1 = FUNCTION MOD(WS-SCORE-2 + 1, 3)
-                   MOVE 0 TO WS-WINLOSS
+                   ADD 0 TO WS-TOTAL-SCORE-1
                WHEN WS-SCORE-1 = FUNCTION MOD(WS-SCORE-2 + 2, 3)
-                   MOVE 6 TO WS-WINLOSS
+                   ADD 6 TO WS-TOTAL-SCORE-1
            END-EVALUATE.
 
            COMPUTE WS-TOTAL-SCORE-1 = WS-TOTAL-SCORE-1 + FUNCTION
-           MOD(WS-SCORE-2, 3) + 1 + WS-WINLOSS.
+           MOD(WS-SCORE-2, 3) + 1.
 
            COMPUTE WS-TOTAL-SCORE-2 = WS-TOTAL-SCORE-2 + FUNCTION
            MOD((WS-SCORE-1 + (FUNCTION MOD (WS-SCORE-2 + 1, 3)) ) + 1,
