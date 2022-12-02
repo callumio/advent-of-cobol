@@ -1,0 +1,101 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. AOC-2022-2.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+           FILE-CONTROL.
+           SELECT INPUT-FILE ASSIGN TO "inputs/day2.txt"
+           ORGANIZATION IS LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD INPUT-FILE.
+       01 INPUT-FILE-DATA.
+           05 SCORE-1 PIC X.
+           05 SPC PIC X.
+           05 SCORE-2 PIC X.
+       WORKING-STORAGE SECTION.
+       01 STATE.
+         05 WS-FINISHED PIC X VALUE "N".
+         05 WS-TO-CONVERT PIC X.
+         05 WS-SCORE-BUF PIC 9.
+         05 WS-SCORE-1 PIC 9.
+         05 WS-SCORE-2 PIC 9.
+         05 WS-WINLOSS PIC 9.
+         05 WS-CURRENT-SCORE PIC 9(6).
+         05 WS-TOTAL-SCORE-1 PIC 9(6) VALUE 0.
+         05 WS-TOTAL-SCORE-2 PIC 9(6) VALUE 0.
+       PROCEDURE DIVISION.
+       MAIN.
+           OPEN INPUT INPUT-FILE.
+           PERFORM PROCESS-DATA UNTIL WS-FINISHED = "Y".
+           STOP RUN.
+       PROCESS-DATA.
+           READ INPUT-FILE AT END PERFORM FINISH.
+
+           MOVE SCORE-1 TO WS-TO-CONVERT.
+           PERFORM CONVERT-TO-NUMS.
+           MOVE WS-SCORE-BUF TO WS-SCORE-1.
+
+           MOVE SCORE-2 TO WS-TO-CONVERT.
+           PERFORM CONVERT-TO-NUMS.
+           MOVE WS-SCORE-BUF TO WS-SCORE-2.
+
+           PERFORM CALC-RPS.
+
+       CALC-RPS.
+           PERFORM CALC-RPS-1.
+           PERFORM CALC-RPS-2.
+
+       CALC-RPS-1.
+           MOVE 0 TO WS-CURRENT-SCORE.
+           MOVE WS-SCORE-2 TO WS-SCORE-BUF.
+
+           IF WS-SCORE-1 = WS-SCORE-2 THEN
+             MOVE 3 TO WS-WINLOSS
+           END-IF.
+
+           ADD 1 TO WS-SCORE-2.
+           MOVE FUNCTION MOD(WS-SCORE-2, 3) TO WS-SCORE-2.
+           IF WS-SCORE-1 = WS-SCORE-2 THEN
+             MOVE 0 TO WS-WINLOSS
+           END-IF.
+
+           MOVE WS-SCORE-BUF TO WS-SCORE-2.
+           ADD 2 TO WS-SCORE-2.
+           MOVE FUNCTION MOD(WS-SCORE-2, 3) TO WS-SCORE-2.
+
+           IF WS-SCORE-1 = WS-SCORE-2 THEN
+             MOVE 6 TO WS-WINLOSS
+           END-IF.
+
+           MOVE WS-SCORE-BUF TO WS-SCORE-2.
+           MOVE FUNCTION MOD(WS-SCORE-2, 3) TO WS-CURRENT-SCORE.
+           ADD FUNCTION SUM(WS-WINLOSS 1 WS-CURRENT-SCORE)
+           TO WS-TOTAL-SCORE-1.
+           MOVE WS-SCORE-BUF TO WS-SCORE-2.
+
+       CALC-RPS-2.
+           MOVE 0 TO WS-CURRENT-SCORE.
+           ADD 1 TO WS-SCORE-2 GIVING WS-SCORE-BUF.
+           ADD FUNCTION MOD(WS-SCORE-BUF, 3) TO WS-SCORE-1.
+           ADD 1 TO WS-SCORE-1.
+           MOVE FUNCTION MOD(WS-SCORE-1, 3) TO WS-SCORE-1.
+           MULTIPLY WS-SCORE-2 BY 3 GIVING WS-SCORE-2.
+           ADD FUNCTION SUM(WS-SCORE-1 WS-SCORE-2 1) TO
+           WS-TOTAL-SCORE-2.
+
+       CONVERT-TO-NUMS.
+           IF WS-TO-CONVERT = "X" OR WS-TO-CONVERT = "A"
+             MOVE 0 TO WS-SCORE-BUF
+           END-IF.
+           IF WS-TO-CONVERT = "Y" OR WS-TO-CONVERT = "B"
+             MOVE 1 TO WS-SCORE-BUF
+           END-IF.
+           IF WS-TO-CONVERT = "Z" OR WS-TO-CONVERT = "C"
+             MOVE 2 TO WS-SCORE-BUF
+           END-IF.
+
+       FINISH.
+           MOVE "Y" TO WS-FINISHED.
+           DISPLAY "Task 1 " WS-TOTAL-SCORE-1.
+           DISPLAY "Task 2 " WS-TOTAL-SCORE-2.
+           CLOSE INPUT-FILE.
