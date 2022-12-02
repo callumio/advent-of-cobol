@@ -6,4 +6,4 @@ year = 2022
 	$(CO) $^ $(COFLAGS)current
 
 clean:
-	rm -rf bin/ &>/dev/null 
+	rm -rf bin/* &>/dev/null 
