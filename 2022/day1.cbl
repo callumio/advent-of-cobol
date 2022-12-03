@@ -3,43 +3,51 @@
        ENVIRONMENT DIVISION.
            INPUT-OUTPUT SECTION.
               FILE-CONTROL.
-              SELECT ELVES ASSIGN TO 'inputs/day1.txt'
+              SELECT INPUT-FILE ASSIGN TO 'inputs/day1.txt'
               ORGANIZATION IS LINE SEQUENTIAL.
        DATA DIVISION.
            FILE SECTION.
-           FD ELVES.
-           01 ELF-STRING PIC X(8).
+           FD INPUT-FILE.
+             01 INPUT-STRING PIC X(8).
        WORKING-STORAGE SECTION.
            01 STATE.
              05 FINISHED PIC X VALUE "n".
-             05 INPUT-VALUE PIC 9(8).
-             05 PTR PIC 9(8) VALUE 1.
-             05 LIST-ELVES OCCURS 200 TIMES.
-               10 ELF-CALORIES PIC 9(8).
-             05 TOTAL-CALORIES PIC 9(8) VALUE 0.
+             05 WS-CALORIES PIC 9(8) OCCURS 3 TIMES VALUE 0.
+             05 WS-TOTAL-CALORIES PIC 9(8) VALUE 0.
        PROCEDURE DIVISION.
            MAIN.
-               OPEN INPUT ELVES.
+               OPEN INPUT INPUT-FILE.
                PERFORM PROCESS-DATA UNTIL FINISHED = "Y".
+               DISPLAY "Task 1: " WS-CALORIES(1).
+               DISPLAY "Task 2: " FUNCTION SUM(WS-CALORIES(1)
+               WS-CALORIES(2) WS-CALORIES(3)).
                STOP RUN.
            PROCESS-DATA.
-               READ ELVES AT END PERFORM FINISH.
-               IF ELF-STRING = " " THEN
-                   MOVE TOTAL-CALORIES TO ELF-CALORIES(PTR)
-                   MOVE 0 TO TOTAL-CALORIES
-                   ADD 1 TO PTR
+               READ INPUT-FILE AT END PERFORM FINISH.
+               IF INPUT-STRING = " " THEN
+                   EVALUATE TRUE
+                     WHEN WS-TOTAL-CALORIES IS GREATER THAN
+                       WS-CALORIES(1)
+                       MOVE WS-CALORIES(2) TO WS-CALORIES(3)
+                       MOVE WS-CALORIES(1) TO WS-CALORIES(2)
+                       MOVE WS-TOTAL-CALORIES TO WS-CALORIES(1)
+                     WHEN WS-TOTAL-CALORIES IS GREATER THAN
+                       WS-CALORIES(2) AND WS-TOTAL-CALORIES IS NOT EQUAL
+                       TO WS-CALORIES(1)
+                       MOVE WS-CALORIES(2) TO WS-CALORIES(3)
+                       MOVE WS-TOTAL-CALORIES TO WS-CALORIES(2)
+                     WHEN WS-TOTAL-CALORIES IS GREATER THAN
+                       WS-CALORIES(3) AND WS-TOTAL-CALORIES IS NOT EQUAL
+                       TO WS-CALORIES(2)
+                       MOVE WS-TOTAL-CALORIES TO WS-CALORIES(3)
+                   END-EVALUATE
+                   MOVE 0 TO WS-TOTAL-CALORIES
                ELSE
-                   MOVE FUNCTION NUMVAL(ELF-STRING) TO INPUT-VALUE
-                   ADD INPUT-VALUE TO TOTAL-CALORIES
+                 ADD FUNCTION NUMVAL(INPUT-STRING) TO
+                 WS-TOTAL-CALORIES
                END-IF.
 
            FINISH.
-             MOVE 0 TO PTR.
-             SORT LIST-ELVES DESCENDING ELF-CALORIES.
-             DISPLAY "Task 1: " LIST-ELVES(1).
-             MOVE FUNCTION SUM(LIST-ELVES(1) LIST-ELVES(2) LIST-ELVES(3)
-             )TO TOTAL-CALORIES.
-             DISPLAY "Task 2: " TOTAL-CALORIES.
-             CLOSE ELVES.
              MOVE "Y" TO FINISHED.
+             CLOSE INPUT-FILE.
             
