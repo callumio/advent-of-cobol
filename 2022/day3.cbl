@@ -77,15 +77,10 @@
                MOVE 0 TO TALLY-FOUND
                MOVE 0 TO TALLY-FOUND-C
                MOVE WS-GROUP-SPLIT(INX-B,1)(INX-C:1) TO WS-PRIORITY-CHAR
-               PERFORM WITH TEST BEFORE VARYING INX-D FROM 2 BY 1 UNTIL
-                 INX-D > 3
-                 INSPECT WS-GROUP-SPLIT(INX-B,INX-D) TALLYING
-                 TALLY-FOUND-C FOR ALL WS-PRIORITY-CHAR
-                 IF TALLY-FOUND-C IS NOT ZERO THEN
-                   ADD 1 TO TALLY-FOUND
-                 END-IF
-                 MOVE 0 TO TALLY-FOUND-C
-               END-PERFORM
+               IF WS-PRIORITY-CHAR IN WS-GROUP-SPLIT(INX-B,2)
+                 AND WS-PRIORITY-CHAR IN WS-GROUP-SPLIT(INX-B,3)
+                 TALLY-FOUND = 2
+               LOCATE
            END-PERFORM.
            MOVE 0 TO TALLY-FOUND.
 
