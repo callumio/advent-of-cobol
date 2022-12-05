@@ -1,0 +1,108 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. AOC-2022-5.
+       AUTHOR. Callum Leslie.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+           FILE-CONTROL.
+           SELECT INPUT-FILE ASSIGN TO "inputs/day5.txt"
+           ORGANIZATION IS LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+           FD INPUT-FILE.
+           01 INPUT-STRING PIC X(64).
+       WORKING-STORAGE SECTION.
+       01 CONST.
+         05 C-WIDTH PIC 9 VALUE 9.
+         05 C-HEIGHT PIC 9 VALUE 8.
+       01 STATE.
+         05 WS-LINE-COUNT PIC 9 VALUE 1.
+         05 WS-CHAR-COUNT PIC 9(2) VALUE 1.
+         05 WS-DISCARD USAGE INDEX.
+         05 WS-STACK-COUNT USAGE INDEX.
+         05 WS-STACK-TO-PTR USAGE INDEX.
+         05 WS-STACK-W-PTR USAGE INDEX VALUE 1.
+         05 WS-STACK OCCURS 2 INDEXED BY INX-A.
+           10 WS-STACKS OCCURS 9.
+             15 WS-STACK-H-PTR USAGE INDEX VALUE 8.
+             15 WS-STACK-DATA PIC X OCCURS 100.
+       01 FLAGS.
+         05 F-FINISHED PIC X VALUE "N".
+         05 F-PARSED PIC X VALUE "N".
+       LINKAGE SECTION.
+       PROCEDURE DIVISION.
+       MAIN.
+           OPEN INPUT INPUT-FILE.
+           MOVE C-HEIGHT TO WS-LINE-COUNT.
+           PERFORM PARSE-DATA C-HEIGHT TIMES.
+           MOVE WS-STACK(1) TO WS-STACK(2).
+           READ INPUT-FILE.
+           READ INPUT-FILE.
+           PERFORM PARSE-MOVES UNTIL F-FINISHED = "Y".
+           DISPLAY " ".
+           PERFORM PRINT-TOP-STACK 2 TIMES.
+
+           STOP RUN.
+
+       PRINT-TOP-STACK.
+           PERFORM VARYING WS-STACK-W-PTR FROM 1 BY 1 UNTIL 
+             WS-STACK-W-PTR > C-WIDTH
+             EVALUATE TRUE
+             WHEN WS-STACK-DATA(INX-A,WS-STACK-W-PTR,
+                WS-STACK-H-PTR(INX-A,WS-STACK-W-PTR)) = " "
+                DISPLAY "_"
+             WHEN OTHER
+                DISPLAY WS-STACK-DATA(INX-A,WS-STACK-W-PTR,
+                WS-STACK-H-PTR(INX-A,WS-STACK-W-PTR)) WITH NO ADVANCING
+           END-PERFORM.
+           DISPLAY " ".
+           SET INX-A UP BY 1.
+
+       PARSE-MOVES.
+           READ INPUT-FILE AT END PERFORM FINISH.
+           IF F-FINISHED = "N" THEN
+             UNSTRING INPUT-STRING DELIMITED BY "move "
+             OR " from " OR " to "
+             INTO WS-DISCARD WS-STACK-COUNT
+             WS-STACK-W-PTR WS-STACK-TO-PTR
+             END-UNSTRING
+             MOVE WS-STACK-COUNT TO WS-DISCARD
+
+             PERFORM WS-STACK-COUNT TIMES
+               ADD 1 TO WS-STACK-H-PTR(1, WS-STACK-TO-PTR)
+               ADD 1 TO WS-STACK-H-PTR(2, WS-STACK-TO-PTR)
+
+               MOVE WS-STACK-DATA(1, WS-STACK-W-PTR,
+               WS-STACK-H-PTR(1,WS-STACK-W-PTR)) TO
+               WS-STACK-DATA(1, WS-STACK-TO-PTR,
+               WS-STACK-H-PTR(1,WS-STACK-TO-PTR))
+
+               SET WS-STACK-H-PTR(1, WS-STACK-W-PTR) DOWN BY 1
+               SET WS-DISCARD DOWN BY 1
+
+               MOVE WS-STACK-DATA(2, WS-STACK-W-PTR,
+               WS-STACK-H-PTR(2,WS-STACK-W-PTR) - WS-DISCARD) TO
+               WS-STACK-DATA(2, WS-STACK-TO-PTR,
+               WS-STACK-H-PTR(2,WS-STACK-TO-PTR))
+             END-PERFORM
+             SUBTRACT WS-STACK-COUNT
+             FROM WS-STACK-H-PTR(2, WS-STACK-W-PTR)
+           END-IF.
+
+       PARSE-DATA.
+           READ INPUT-FILE.
+           PERFORM VARYING WS-CHAR-COUNT FROM 2 BY 4 UNTIL
+             WS-STACK-W-PTR > C-WIDTH
+             DISPLAY INPUT-STRING(WS-CHAR-COUNT:1) WITH NO ADVANCING
+             MOVE INPUT-STRING(WS-CHAR-COUNT:1) TO WS-STACK-DATA(
+             1, WS-STACK-W-PTR, WS-LINE-COUNT)
+             IF INPUT-STRING(WS-CHAR-COUNT:1) = " "
+               SUBTRACT 1 FROM WS-STACK-H-PTR(1, WS-STACK-W-PTR)
+             END-IF
+             ADD 1 TO WS-STACK-W-PTR
+           END-PERFORM.
+           DISPLAY " "
+           SUBTRACT 1 FROM WS-LINE-COUNT.
+           MOVE 1 TO WS-STACK-W-PTR.
+       FINISH.
+           CLOSE INPUT-FILE.
+           MOVE "Y" TO F-FINISHED.
