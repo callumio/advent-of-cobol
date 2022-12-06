@@ -1,0 +1,51 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. AOC-2022-6.
+       AUTHOR. Callum Leslie.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+           FILE-CONTROL.
+           SELECT INPUT-FILE ASSIGN TO "inputs/day6.txt"
+           ORGANIZATION IS LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+           FD INPUT-FILE.
+           01 INPUT-STRING PIC A(4096).
+       WORKING-STORAGE SECTION.
+       01 STATE.
+         05 WS-MARKER PIC 9(2).
+         05 WS-STRING-BUF PIC A(20).
+       77 INX-A USAGE IS INDEX VALUE 0.
+       77 INX-B USAGE IS INDEX VALUE 0.
+       77 INX-C USAGE IS INDEX VALUE 1.
+       77 INX-D USAGE IS INDEX VALUE 1.
+       PROCEDURE DIVISION.
+       MAIN.
+           OPEN INPUT INPUT-FILE.
+           READ INPUT-FILE.
+           CLOSE INPUT-FILE.
+           INSPECT INPUT-STRING TALLYING INX-A FOR TRAILING 
+           SPACES.
+           SUBTRACT INX-A FROM LENGTH OF INPUT-STRING GIVING INX-A.
+           SET WS-MARKER TO 4.
+           PERFORM PROCESS-DATA.
+           SET WS-MARKER TO 14.
+           PERFORM PROCESS-DATA.
+           STOP RUN.
+       PROCESS-DATA.
+           PERFORM VARYING INX-B FROM 1 BY 1 UNTIL INX-B > (INX-A -
+             WS-MARKER + 1)
+             MOVE INPUT-STRING(INX-B:(WS-MARKER)) TO
+             WS-STRING-BUF
+             SET INX-D TO 0
+             PERFORM VARYING INX-C FROM 1 BY 1 UNTIL
+               INX-D > 1 OR INX-C > WS-MARKER
+               SET INX-D TO 0
+               INSPECT WS-STRING-BUF TALLYING INX-D FOR ALL
+               WS-STRING-BUF(INX-C:1)
+             END-PERFORM
+             IF INX-D = 1
+               DISPLAY FUNCTION SUM (INX-B, WS-MARKER, -1)
+               EXIT PERFORM
+             END-IF
+           END-PERFORM.
+           SET INX-C UP BY 1.
